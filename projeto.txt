@@ -1,0 +1,111 @@
+Desafio Técnico Back-end
+
+API de Simulação de Investimentos
+
+1. Contexto
+
+A CAIXA está evoluindo sua plataforma digital de investimentos. Seu desafio é construir uma API que simula investimentos com base em produtos parametrizados em banco de dados, persistindo o histórico de simulações.
+
+2. Objetivo
+Entregar uma aplicação back-end capaz de: receber uma solicitação de simulação via JSON, validar e selecionar um produto elegível a partir do banco, calcular o valor final, persistir a simulação e disponibilizar o histórico via endpoint.
+
+3. Tecnologias permitidas
+Escolha uma das opções abaixo:
+Java 21 + Quarkus (REST, JPA/Hibernate) + SQLite
+NET 9+ (ASP.NET Web Api, Entity Framework Core) + SQLite
+
+4. Requisitos obrigatórios (MVP)
+4.1 Banco de dados
+Crie um banco SQLite com as tabelas produtos e simulacoes. É Obrigatório incluir seed de dados (migrations, scripts SQL ou inicialização automática)
+
+Tabela produtos (campos mínimos):
+- id
+- nome
+- tipoProduto (CDB, LCI, LCA, etc)
+- rentabilidadeAnual (ex: 0,12)
+- risco (Baixo, Médio, Alto)
+- prazoMinMeses / prazoMaxMeses
+- valorMin / valorMax
+
+Tabela simulacoes (campos mínimos):
+- id
+- clientId
+- produtoNome
+- tipoProduto
+- valorInvestido
+- prazoMeses
+- rentabilidadeAplicada
+- valorFinal
+- dataSimulacao
+
+4.2 Endpoint - Criar Simulação
+
+POST /simulacoes
+Request (exemplo):
+{
+ "clienteId": 123,
+ "valor": 10000,00,
+ "prazoMeses": 12,
+ "tipoProduto": "CDB"
+}
+
+Regras:
+- Validar campos obrigatórios e valores positivos
+- Buscar produto compatível no banco
+- Se não houver produto elegível, retornar HTTP 422
+
+Cálculo sugerido:
+valorFinal = valor * (1 + rentabilidadeAnual/12) ^prazoMeses
+Response (exemplo):
+{
+  "produtoValidado: {
+    "id": 1,
+    "nome": "CDB CAIXA 2026",
+    "tipo": "CDB",
+    "rentabilidade": 0.12,
+    "risco": "Baixo
+  },
+  "resultadoSimulacao": {
+    "valorFinal": 11200.00,
+    "prazoMeses": 12
+  },
+  "dataSimulacao": "2026-02-23T14:00:00Z"
+}
+
+4.3 Endpoint Histórico
+GET /simulacoes?clientId=123
+{
+  {
+    "id": 1,
+    "clienteId": 123,
+    "produto": "CDB Caixa 2026",
+    "valorInvestido": 10000.00,
+    "valorFinal": 11200.00",
+    "prazoMeses" 12,
+    "dataSimulacao": 2026-02-23T14:00:00Z"
+  }
+}
+
+4.4 Testes
+Incluir pelo menos 2 testes automatizados:
+- Teste do cálculo
+- Teste do endpoint POST/simulacoes
+
+5. Entrega
+- Código
+- README com instruções de execução e testes
+
+6 Bônus (opcional)
+- Dockerfile
+- Autenticação JWT simples
+- Endpoint de agregação
+- Logs estruturados
+
+7 Critérios de Avaliação
+- Funcionamento da API
+- Organização e clareza do código
+- Validações e tratamentos de erros
+- CObertura de testes unitários 80% ou mais
+
+8. Observações finais
+O objetivo do desafio é avaliar funamentos de desenvolvimento back-end. Mantenha a solução simples, funcional e bem documentada.
