@@ -45,4 +45,8 @@ public class SimulacaoService {
     public List<Simulacao> buscarHistorico(Long clienteId) {
         return Simulacao.findByClienteId(clienteId);
     }
+
+    public List<Simulacao> buscarHistoricoComProduto(Long clienteId) {
+        return Simulacao.findByClienteIdComProduto(clienteId);
+    }
 }

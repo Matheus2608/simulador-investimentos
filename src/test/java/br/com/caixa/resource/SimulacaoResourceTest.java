@@ -130,6 +130,77 @@ class SimulacaoResourceTest {
     }
 
     @Test
+    void deveRetornarAgregacaoComSimulacoes() {
+        Long clienteId = 800L;
+        String token = gerarToken(clienteId);
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("""
+                        {
+                            "valor": 10000,
+                            "prazoMeses": 12,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201);
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("""
+                        {
+                            "valor": 50000,
+                            "prazoMeses": 24,
+                            "tipoProduto": "LCI"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201);
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/simulacoes/agregacao")
+                .then()
+                .statusCode(200)
+                .body("resumoGeral.totalSimulacoes", equalTo(2))
+                .body("resumoGeral.valorTotalInvestido", greaterThan(0f))
+                .body("resumoGeral.valorTotalProjetado", greaterThan(0f))
+                .body("resumoGeral.rendimentoTotal", greaterThan(0f))
+                .body("porTipoProduto", hasSize(2))
+                .body("distribuicaoRisco", not(empty()))
+                .body("destaques.maiorRendimento", notNullValue())
+                .body("destaques.maiorValorFinal", notNullValue())
+                .body("destaques.produtoFavorito", notNullValue());
+    }
+
+    @Test
+    void deveRetornarAgregacaoVaziaSemSimulacoes() {
+        Long clienteId = 77777L;
+        String token = gerarToken(clienteId);
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/simulacoes/agregacao")
+                .then()
+                .statusCode(200)
+                .body("resumoGeral.totalSimulacoes", equalTo(0))
+                .body("resumoGeral.valorTotalInvestido", equalTo(0))
+                .body("porTipoProduto", hasSize(0))
+                .body("distribuicaoRisco", hasSize(0))
+                .body("destaques.maiorRendimento", nullValue())
+                .body("destaques.maiorValorFinal", nullValue());
+    }
+
+    @Test
     void deveRetornar401SemToken() {
         given()
                 .contentType("application/json")

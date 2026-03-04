@@ -2,6 +2,7 @@ package br.com.caixa.resource;
 
 import br.com.caixa.application.SimulacaoService;
 import br.com.caixa.domain.Simulacao;
+import br.com.caixa.dto.AgregacaoResponse;
 import br.com.caixa.dto.ErroResponse;
 import br.com.caixa.dto.HistoricoSimulacaoResponse;
 import br.com.caixa.dto.SimulacaoRequest;
@@ -124,5 +125,27 @@ public class SimulacaoResource {
         return simulacaoService.buscarHistorico(clienteId).stream()
                 .map(SimulacaoMapper::toHistorico)
                 .toList();
+    }
+
+    @GET
+    @Path("/agregacao")
+    @Operation(
+            summary = "Consultar metricas agregadas das simulacoes",
+            description = "Retorna metricas consolidadas das simulacoes do cliente autenticado: "
+                    + "resumo geral, breakdown por tipo de produto, distribuicao de risco e destaques. "
+                    + "O cliente e identificado automaticamente pelo token JWT.")
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "Metricas agregadas das simulacoes (retorna valores zerados se nao houver simulacoes)",
+                    content = @Content(schema = @Schema(implementation = AgregacaoResponse.class))),
+            @APIResponse(
+                    responseCode = "401",
+                    description = "Token JWT ausente ou invalido")
+    })
+    public AgregacaoResponse agregacao() {
+        Long clienteId = Long.parseLong(jwt.getSubject());
+        List<Simulacao> simulacoes = simulacaoService.buscarHistoricoComProduto(clienteId);
+        return SimulacaoMapper.toAgregacao(simulacoes);
     }
 }
