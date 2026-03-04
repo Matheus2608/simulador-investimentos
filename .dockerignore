@@ -1,5 +1,9 @@
-*
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+target/
+*.db
+.idea
+.vscode
+.settings
+.classpath
+.project
+*.iml
+.DS_Store

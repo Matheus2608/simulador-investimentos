@@ -16,10 +16,12 @@ COPY --from=build /app/target/quarkus-app/*.jar ./
 COPY --from=build /app/target/quarkus-app/app/ ./app/
 COPY --from=build /app/target/quarkus-app/quarkus/ ./quarkus/
 
+RUN mkdir -p /app/data && chown appuser:appgroup /app/data
+
 EXPOSE 8080
 
 USER appuser
 
-ENV JAVA_OPTS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
+ENV JAVA_TOOL_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager -Dquarkus.datasource.jdbc.url=jdbc:sqlite:/app/data/simulador-investimentos.db"
 
 ENTRYPOINT ["java", "-jar", "quarkus-run.jar"]
