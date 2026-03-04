@@ -258,6 +258,159 @@ class SimulacaoResourceTest {
     }
 
     @Test
+    void deveSimularComValorNoLimiteMinimoDoProduto() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(300L))
+                .body("""
+                        {
+                            "valor": 1000.00,
+                            "prazoMeses": 3,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201)
+                .body("produtoValidado.nome", equalTo("CDB CAIXA 2026"))
+                .body("resultadoSimulacao.valorFinal", greaterThan(1000f));
+    }
+
+    @Test
+    void deveSimularComValorNoLimiteMaximoDoProduto() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(301L))
+                .body("""
+                        {
+                            "valor": 500000.00,
+                            "prazoMeses": 36,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201)
+                .body("produtoValidado.nome", equalTo("CDB CAIXA 2026"))
+                .body("resultadoSimulacao.valorFinal", greaterThan(500000f));
+    }
+
+    @Test
+    void deveRetornar422QuandoValorExcedeTodosOsProdutos() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(302L))
+                .body("""
+                        {
+                            "valor": 1000001.00,
+                            "prazoMeses": 12,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(422)
+                .body("mensagem", containsString("elegivel"));
+    }
+
+    @Test
+    void deveRetornar422QuandoPrazoNoLimiteMaximoDaValidacaoSemProduto() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(303L))
+                .body("""
+                        {
+                            "valor": 10000,
+                            "prazoMeses": 840,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(422)
+                .body("mensagem", containsString("elegivel"));
+    }
+
+    @Test
+    void deveManterPrecisaoDecimalNoValorInvestido() {
+        Long clienteId = 304L;
+        String token = gerarToken(clienteId);
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("""
+                        {
+                            "valor": 10000.50,
+                            "prazoMeses": 12,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201);
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/simulacoes")
+                .then()
+                .statusCode(200)
+                .body("[0].valorInvestido", equalTo(10000.50f));
+    }
+
+    @Test
+    void deveRetornarHistoricoOrdenadoPorDataDecrescente() {
+        Long clienteId = 305L;
+        String token = gerarToken(clienteId);
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("""
+                        {
+                            "valor": 1000,
+                            "prazoMeses": 3,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201);
+
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body("""
+                        {
+                            "valor": 5000,
+                            "prazoMeses": 12,
+                            "tipoProduto": "LCA"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(201);
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/simulacoes")
+                .then()
+                .statusCode(200)
+                .body("$", hasSize(2))
+                .body("[0].valorInvestido", equalTo(5000f))
+                .body("[1].valorInvestido", equalTo(1000f));
+    }
+
+    @Test
     void deveRetornar401SemToken() {
         given()
                 .contentType("application/json")
