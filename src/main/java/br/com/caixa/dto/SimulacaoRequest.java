@@ -11,15 +11,15 @@ import java.math.BigDecimal;
 public record SimulacaoRequest(
 
         @NotNull(message = "valor e obrigatorio")
-        @Positive(message = "valor deve ser positivo")
-        @DecimalMin(value = "0.01", message = "valor deve ser maior que zero")
-        @Schema(description = "Valor a ser investido em reais", example = "10000.00", minimum = "0.01")
+        @DecimalMin(value = "50.00", message = "valor deve ser no minimo R$ 50,00")
+        @Digits(integer = 9, fraction = 2, message = "valor deve ter no maximo 9 digitos inteiros e 2 decimais")
+        @Schema(description = "Valor a ser investido em reais", example = "10000.00", minimum = "50.00")
         BigDecimal valor,
 
         @NotNull(message = "prazoMeses e obrigatorio")
         @Positive(message = "prazoMeses deve ser positivo")
-        @Min(value = 1, message = "prazoMeses deve ser no minimo 1")
-        @Schema(description = "Prazo do investimento em meses", example = "12", minimum = "1")
+        @Max(value = 840, message = "prazoMeses deve ser no maximo 840")
+        @Schema(description = "Prazo do investimento em meses", example = "12", minimum = "1", maximum = "840")
         Integer prazoMeses,
 
         @NotNull(message = "tipoProduto e obrigatorio")

@@ -53,7 +53,7 @@ class SimulacaoResourceTest {
                 .header("Authorization", "Bearer " + gerarToken(123L))
                 .body("""
                         {
-                            "valor": 1,
+                            "valor": 50,
                             "prazoMeses": 1,
                             "tipoProduto": "CDB"
                         }
@@ -94,6 +94,63 @@ class SimulacaoResourceTest {
                 .post("/simulacoes")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void deveRetornar400QuandoPrazoExcedeMaximo() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(123L))
+                .body("""
+                        {
+                            "valor": 10000,
+                            "prazoMeses": 841,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(400)
+                .body("detalhes", hasItem(containsString("840")));
+    }
+
+    @Test
+    void deveRetornar400QuandoValorAbaixoDoMinimo() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(123L))
+                .body("""
+                        {
+                            "valor": 49.99,
+                            "prazoMeses": 12,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(400)
+                .body("detalhes", hasItem(containsString("50")));
+    }
+
+    @Test
+    void deveRetornar400QuandoValorTemMaisDeDuasCasasDecimais() {
+        given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + gerarToken(123L))
+                .body("""
+                        {
+                            "valor": 10000.123,
+                            "prazoMeses": 12,
+                            "tipoProduto": "CDB"
+                        }
+                        """)
+                .when()
+                .post("/simulacoes")
+                .then()
+                .statusCode(400)
+                .body("detalhes", hasItem(containsString("2 decimais")));
     }
 
     @Test
