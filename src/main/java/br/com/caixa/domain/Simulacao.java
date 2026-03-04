@@ -1,6 +1,7 @@
 package br.com.caixa.domain;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.panache.common.Sort;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -27,6 +28,10 @@ public class Simulacao extends PanacheEntityBase {
 
     @Column(name = "cliente_id", nullable = false)
     public Long clienteId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", insertable = false, updatable = false)
+    public Cliente cliente;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produto_id", nullable = false)
@@ -71,6 +76,11 @@ public class Simulacao extends PanacheEntityBase {
     }
 
     public static List<Simulacao> findByClienteId(Long clienteId) {
-        return list("clienteId", clienteId);
+        return list("clienteId", Sort.by("dataSimulacao").descending(), clienteId);
+    }
+
+    public static List<Simulacao> findByClienteIdComProduto(Long clienteId) {
+        return find("SELECT s FROM Simulacao s LEFT JOIN FETCH s.produto WHERE s.clienteId = ?1 ORDER BY s.dataSimulacao DESC",
+                clienteId).list();
     }
 }
