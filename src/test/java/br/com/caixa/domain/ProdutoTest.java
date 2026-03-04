@@ -49,6 +49,24 @@ class ProdutoTest {
         assertThat(produto.isElegivel(new BigDecimal("10000"), 37)).isFalse();
     }
 
+    @Test
+    void deveSerElegivelComRiscoCorreto() {
+        Produto produto = criarProduto();
+        assertThat(produto.isElegivel(new BigDecimal("10000"), 12, Risco.BAIXO)).isTrue();
+    }
+
+    @Test
+    void naoDeveSerElegivelComRiscoDiferente() {
+        Produto produto = criarProduto();
+        assertThat(produto.isElegivel(new BigDecimal("10000"), 12, Risco.ALTO)).isFalse();
+    }
+
+    @Test
+    void deveSerElegivelComRiscoNulo() {
+        Produto produto = criarProduto();
+        assertThat(produto.isElegivel(new BigDecimal("10000"), 12, null)).isTrue();
+    }
+
     private Produto criarProduto() {
         Produto p = new Produto();
         p.nome = "CDB CAIXA 2026";
