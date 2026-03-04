@@ -69,3 +69,7 @@ Retorna o historico de simulacoes do cliente.
 | LCI CAIXA Plus       | LCI  | 10.5% a.a.   | MEDIO | 12-36 meses | R$ 10.000 - 1.000.000|
 | LCA CAIXA Agro       | LCA  | 10% a.a.     | BAIXO | 6-24 meses  | R$ 2.000 - 300.000  |
 | LCA CAIXA Agro Premium| LCA | 11.5% a.a.   | MEDIO | 12-48 meses | R$ 10.000 - 500.000 |
+
+## Decisoes tecnicas
+
+Veja [DECISOES_TECNICAS.md](DECISOES_TECNICAS.md) para detalhes sobre escolhas de arquitetura e trade-offs.
