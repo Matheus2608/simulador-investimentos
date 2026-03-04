@@ -76,7 +76,7 @@ public class Simulacao extends PanacheEntityBase {
     }
 
     public static List<Simulacao> findByClienteId(Long clienteId) {
-        return list("clienteId", Sort.by("dataSimulacao").descending(), clienteId);
+        return list("clienteId", Sort.by("dataSimulacao").descending().and("id").descending(), clienteId);
     }
 
     public static List<Simulacao> findByClienteIdComProduto(Long clienteId) {
