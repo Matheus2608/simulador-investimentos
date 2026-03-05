@@ -10,15 +10,21 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class SimulacaoService {
+
+    private static final Logger LOG = Logger.getLogger(SimulacaoService.class);
 
     @Inject
     JurosCompostos jurosCompostos;
 
     @Transactional
     public Simulacao simular(Long clienteId, BigDecimal valor, int prazoMeses, TipoProduto tipoProduto, Risco risco) {
+        LOG.debugf("Simulando: clienteId=%d, tipo=%s, valor=%s, prazo=%d, risco=%s",
+                clienteId, tipoProduto, valor, prazoMeses, risco);
+
         Produto produto = buscarProdutoElegivel(tipoProduto, valor, prazoMeses, risco);
         EstrategiaCalculo estrategia = resolverEstrategia(produto);
         BigDecimal valorFinal = estrategia.calcular(valor, prazoMeses, produto);
@@ -26,6 +32,7 @@ public class SimulacaoService {
         Simulacao simulacao = Simulacao.criar(produto, clienteId, valor, prazoMeses, valorFinal);
         simulacao.persist();
 
+        LOG.infof("Simulacao criada: id=%d, produto=%s, valorFinal=%s", simulacao.id, produto.nome, valorFinal);
         return simulacao;
     }
 

@@ -24,6 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 
 @Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -31,6 +32,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Tag(name = "Autenticacao", description = "Endpoints de registro e login de clientes. Retornam um token JWT para uso nos endpoints protegidos.")
 @PermitAll
 public class AuthResource {
+
+    private static final Logger LOG = Logger.getLogger(AuthResource.class);
 
     @Inject
     TokenService tokenService;
@@ -72,12 +75,14 @@ public class AuthResource {
     })
     public Response registrar(@Valid RegistroRequest request) {
         if (Cliente.findByEmail(request.email()).isPresent()) {
+            LOG.warnf("Tentativa de registro com email duplicado: %s", request.email());
             return Response.status(Response.Status.CONFLICT)
                     .entity(new ErroResponse(409, "Email ja cadastrado"))
                     .build();
         }
 
         Cliente cliente = Cliente.registrar(request.nome(), request.email(), request.senha());
+        LOG.infof("Cliente registrado: id=%d, email=%s", cliente.id, cliente.email);
 
         String token = tokenService.gerarToken(cliente.id, cliente.email);
         return Response.status(Response.Status.CREATED)
@@ -120,11 +125,15 @@ public class AuthResource {
     public Response login(@Valid LoginRequest request) {
         return Cliente.autenticar(request.email(), request.senha())
                 .map(cliente -> {
+                    LOG.infof("Login bem-sucedido: clienteId=%d", cliente.id);
                     String token = tokenService.gerarToken(cliente.id, cliente.email);
                     return Response.ok(new LoginResponse(token)).build();
                 })
-                .orElseGet(() -> Response.status(Response.Status.UNAUTHORIZED)
-                        .entity(new ErroResponse(401, "Credenciais invalidas"))
-                        .build());
+                .orElseGet(() -> {
+                    LOG.warnf("Falha de login: email=%s", request.email());
+                    return Response.status(Response.Status.UNAUTHORIZED)
+                            .entity(new ErroResponse(401, "Credenciais invalidas"))
+                            .build();
+                });
     }
 }
