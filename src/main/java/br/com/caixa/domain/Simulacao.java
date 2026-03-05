@@ -30,10 +30,6 @@ public class Simulacao extends PanacheEntityBase {
     public Long clienteId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", insertable = false, updatable = false)
-    public Cliente cliente;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produto_id", nullable = false)
     public Produto produto;
 

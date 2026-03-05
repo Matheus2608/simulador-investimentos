@@ -17,6 +17,18 @@ public class SimulacaoService {
     @Inject
     JurosCompostos jurosCompostos;
 
+    @Transactional
+    public Simulacao simular(Long clienteId, BigDecimal valor, int prazoMeses, TipoProduto tipoProduto, Risco risco) {
+        Produto produto = buscarProdutoElegivel(tipoProduto, valor, prazoMeses, risco);
+        EstrategiaCalculo estrategia = resolverEstrategia(produto);
+        BigDecimal valorFinal = estrategia.calcular(valor, prazoMeses, produto);
+
+        Simulacao simulacao = Simulacao.criar(produto, clienteId, valor, prazoMeses, valorFinal);
+        simulacao.persist();
+
+        return simulacao;
+    }
+
     public Produto buscarProdutoElegivel(TipoProduto tipoProduto, BigDecimal valor, int prazoMeses, Risco risco) {
         return Produto.findElegivel(tipoProduto, valor, prazoMeses, risco)
                 .orElseThrow(() -> new ProdutoNaoElegivelException(
@@ -28,18 +40,6 @@ public class SimulacaoService {
     // pode ser alterado para selecionar a estrategia com base no produto/tipo
     private EstrategiaCalculo resolverEstrategia(Produto produto) {
         return jurosCompostos;
-    }
-
-    @Transactional
-    public Simulacao simular(Long clienteId, BigDecimal valor, int prazoMeses, TipoProduto tipoProduto, Risco risco) {
-        Produto produto = buscarProdutoElegivel(tipoProduto, valor, prazoMeses, risco);
-        EstrategiaCalculo estrategia = resolverEstrategia(produto);
-        BigDecimal valorFinal = estrategia.calcular(valor, prazoMeses, produto);
-
-        Simulacao simulacao = Simulacao.criar(produto, clienteId, valor, prazoMeses, valorFinal);
-        simulacao.persist();
-
-        return simulacao;
     }
 
     public List<Simulacao> buscarHistorico(Long clienteId) {
