@@ -16,29 +16,27 @@ public final class CalculoAgregacao {
     public static Money somarValoresInvestidos(List<Simulacao> simulacoes) {
         return simulacoes.stream()
                 .map(s -> Money.of(s.valorInvestido))
-                .reduce(Money.of(BigDecimal.ZERO), Money::somar);
+                .reduce(Money.ZERO, Money::somar);
     }
 
     public static Money somarValoresFinais(List<Simulacao> simulacoes) {
         return simulacoes.stream()
                 .map(s -> Money.of(s.valorFinal))
-                .reduce(Money.of(BigDecimal.ZERO), Money::somar);
+                .reduce(Money.ZERO, Money::somar);
     }
 
     public static Money calcularRendimentoPercentual(Simulacao s) {
         return Money.of(s.valorFinal)
                 .dividir(s.valorInvestido)
-                .multiplicar(BigDecimal.valueOf(100))
-                .somar(BigDecimal.valueOf(-100));
+                .subtrair(Money.of("1"))
+                .multiplicar(Money.of("100"));
     }
 
     public static BigDecimal calcularRendimentoPercentualMedio(List<Simulacao> simulacoes) {
-        BigDecimal soma = simulacoes.stream()
-                .map(s -> calcularRendimentoPercentual(s).toBigDecimal())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return Money.of(soma)
-                .dividir(BigDecimal.valueOf(simulacoes.size()))
-                .arredondar();
+        Money soma = simulacoes.stream()
+                .map(s -> calcularRendimentoPercentual(s))
+                .reduce(Money.ZERO, Money::somar);
+        return soma.dividir(BigDecimal.valueOf(simulacoes.size())).arredondar();
     }
 
     public static BigDecimal calcularTicketMedio(Money totalInvestido, int totalSimulacoes) {
@@ -46,12 +44,10 @@ public final class CalculoAgregacao {
     }
 
     public static int calcularPrazoMedioPonderado(List<Simulacao> simulacoes, Money totalInvestido) {
-        BigDecimal somaPrazoPonderado = simulacoes.stream()
-                .map(s -> s.valorInvestido.multiply(BigDecimal.valueOf(s.prazoMeses)))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return Money.of(somaPrazoPonderado)
-                .dividir(totalInvestido.toBigDecimal())
-                .arredondar().intValue();
+        Money somaPrazoPonderado = simulacoes.stream()
+                .map(s -> Money.of(s.valorInvestido).multiplicar(BigDecimal.valueOf(s.prazoMeses)))
+                .reduce(Money.ZERO, Money::somar);
+        return somaPrazoPonderado.dividir(totalInvestido).arredondar().intValue();
     }
 
     public static int calcularPrazoMedio(List<Simulacao> simulacoes) {

@@ -63,6 +63,23 @@ class MoneyTest {
     }
 
     @Test
+    void deveSubtrairComBigDecimal() {
+        Money resultado = Money.of("100").subtrair(new BigDecimal("30.50"));
+        assertThat(resultado.toBigDecimal()).isEqualByComparingTo("69.50");
+    }
+
+    @Test
+    void deveSubtrairComMoney() {
+        Money resultado = Money.of("200").subtrair(Money.of("75"));
+        assertThat(resultado.toBigDecimal()).isEqualByComparingTo("125");
+    }
+
+    @Test
+    void zeroDeveSerZero() {
+        assertThat(Money.ZERO.toBigDecimal()).isEqualByComparingTo("0");
+    }
+
+    @Test
     void deveCalcularPotencia() {
         Money resultado = Money.of("1.01").pow(12);
         assertThat(resultado.toBigDecimal().doubleValue()).isCloseTo(1.12682503, org.assertj.core.data.Offset.offset(0.00001));

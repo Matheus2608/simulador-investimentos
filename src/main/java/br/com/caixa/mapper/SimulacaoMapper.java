@@ -74,9 +74,9 @@ public final class SimulacaoMapper {
                 .entrySet().stream()
                 .map(e -> {
                     Money valorRisco = CalculoAgregacao.somarValoresInvestidos(e.getValue());
-                    BigDecimal percentual = Money.of(valorRisco.toBigDecimal())
-                            .dividir(valorTotalInvestido.toBigDecimal())
-                            .multiplicar(BigDecimal.valueOf(100))
+                    BigDecimal percentual = valorRisco
+                            .dividir(valorTotalInvestido)
+                            .multiplicar(Money.of("100"))
                             .arredondar();
                     return new DistribuicaoRisco(e.getKey().name(), percentual, e.getValue().size());
                 })
@@ -92,14 +92,13 @@ public final class SimulacaoMapper {
         int total = simulacoes.size();
         Money totalInvestido = CalculoAgregacao.somarValoresInvestidos(simulacoes);
         Money totalProjetado = CalculoAgregacao.somarValoresFinais(simulacoes);
-        BigDecimal rendimentoTotal = totalProjetado.toBigDecimal()
-                .subtract(totalInvestido.toBigDecimal());
+        Money rendimentoTotal = totalProjetado.subtrair(totalInvestido);
 
         return new ResumoGeral(
                 total,
                 totalInvestido.arredondar(),
                 totalProjetado.arredondar(),
-                Money.of(rendimentoTotal).arredondar(),
+                rendimentoTotal.arredondar(),
                 CalculoAgregacao.calcularRendimentoPercentualMedio(simulacoes),
                 CalculoAgregacao.calcularTicketMedio(totalInvestido, total),
                 CalculoAgregacao.calcularPrazoMedioPonderado(simulacoes, totalInvestido)
@@ -110,14 +109,13 @@ public final class SimulacaoMapper {
         int total = simulacoes.size();
         Money totalInvestido = CalculoAgregacao.somarValoresInvestidos(simulacoes);
         Money totalProjetado = CalculoAgregacao.somarValoresFinais(simulacoes);
-        BigDecimal rendimentoTotal = totalProjetado.toBigDecimal()
-                .subtract(totalInvestido.toBigDecimal());
+        Money rendimentoTotal = totalProjetado.subtrair(totalInvestido);
 
         return new AgregacaoPorTipo(
                 tipo, total,
                 totalInvestido.arredondar(),
                 totalProjetado.arredondar(),
-                Money.of(rendimentoTotal).arredondar(),
+                rendimentoTotal.arredondar(),
                 CalculoAgregacao.calcularRendimentoPercentualMedio(simulacoes),
                 CalculoAgregacao.calcularTicketMedio(totalInvestido, total),
                 CalculoAgregacao.calcularPrazoMedio(simulacoes)

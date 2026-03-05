@@ -10,6 +10,8 @@ public record Money(BigDecimal valor) {
     private static final int SCALE_APRESENTACAO = 2;
     private static final RoundingMode ROUNDING = RoundingMode.HALF_EVEN;
 
+    public static final Money ZERO = new Money(BigDecimal.ZERO);
+
     public Money {
         if (valor == null) {
             throw new IllegalArgumentException("valor nao pode ser nulo");
@@ -46,6 +48,14 @@ public record Money(BigDecimal valor) {
 
     public Money somar(Money outro) {
         return somar(outro.valor);
+    }
+
+    public Money subtrair(BigDecimal parcela) {
+        return new Money(valor.subtract(parcela, MC));
+    }
+
+    public Money subtrair(Money outro) {
+        return subtrair(outro.valor);
     }
 
     public Money pow(int expoente) {
