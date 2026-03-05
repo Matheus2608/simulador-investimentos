@@ -15,7 +15,9 @@ API REST para simulacao de investimentos, desenvolvida com Quarkus e Java 21. Se
 ./mvnw quarkus:dev
 ```
 
-A aplicacao sobe em http://localhost:8080. O Swagger UI fica disponivel em http://localhost:8080/q/swagger-ui.
+A aplicacao sobe em http://localhost:8080. 
+
+O Swagger UI fica disponivel em http://localhost:8080/q/swagger-ui. Onde é possível ver com detalhes a documentação da API
 
 O banco SQLite (`simulador-investimentos.db`) e criado automaticamente no diretorio do projeto. As migrations do Flyway rodam no startup e fazem o seed de 6 produtos.
 
@@ -33,31 +35,6 @@ docker run -p 8080:8080 simulador-investimentos
 ```
 
 Os testes usam um banco SQLite separado (`target/test-simulador.db`) que e recriado a cada execucao.
-
-## Endpoints
-
-### POST /simulacoes
-
-Cria uma simulacao de investimento.
-
-```json
-{
-  "clienteId": 123,
-  "valor": 10000,
-  "prazoMeses": 12,
-  "tipoProduto": "CDB",
-  "risco": "BAIXO"
-}
-```
-
-- `tipoProduto`: `CDB`, `LCI` ou `LCA`
-- `risco`: `BAIXO`, `MEDIO` ou `ALTO` (opcional — se nao informado, considera todos)
-
-Retorna `201` com o resultado da simulacao ou `422` se nenhum produto for elegivel.
-
-### GET /simulacoes?clienteId=123
-
-Retorna o historico de simulacoes do cliente.
 
 ## Produtos disponiveis (seed)
 
