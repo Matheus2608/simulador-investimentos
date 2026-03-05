@@ -74,6 +74,11 @@ public class AuthResource {
                     content = @Content(schema = @Schema(implementation = ErroResponse.class)))
     })
     public Response registrar(@Valid RegistroRequest request) {
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErroResponse(400, "Corpo da requisicao e obrigatorio"))
+                    .build();
+        }
         if (Cliente.findByEmail(request.email()).isPresent()) {
             LOG.warnf("Tentativa de registro com email duplicado: %s", request.email());
             return Response.status(Response.Status.CONFLICT)
@@ -123,6 +128,11 @@ public class AuthResource {
                     content = @Content(schema = @Schema(implementation = ErroResponse.class)))
     })
     public Response login(@Valid LoginRequest request) {
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErroResponse(400, "Corpo da requisicao e obrigatorio"))
+                    .build();
+        }
         return Cliente.autenticar(request.email(), request.senha())
                 .map(cliente -> {
                     LOG.infof("Login bem-sucedido: clienteId=%d", cliente.id);

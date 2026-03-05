@@ -95,6 +95,11 @@ public class SimulacaoResource {
                     content = @Content(schema = @Schema(implementation = ErroResponse.class)))
     })
     public Response criar(@Valid SimulacaoRequest request) {
+        if (request == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(new ErroResponse(400, "Corpo da requisicao e obrigatorio"))
+                    .build();
+        }
         Long clienteId = Long.parseLong(jwt.getSubject());
 
         Simulacao simulacao = simulacaoService.simular(
